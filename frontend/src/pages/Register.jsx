@@ -30,11 +30,9 @@ export default function Register() {
     setError('');
 
     try {
-      const response = await authAPI.register(formData);
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      navigate('/');
-      window.location.reload();
+      await authAPI.register(formData);
+      // Don't log in automatically. Redirect to login page.
+      navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     } finally {

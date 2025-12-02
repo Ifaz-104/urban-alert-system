@@ -1,0 +1,288 @@
+/* frontend/src/pages/ReportDetails.css */
+
+.report-details-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--space-32);
+    background: var(--color-background);
+    min-height: 100vh;
+}
+
+.report-details-header {
+    margin-bottom: var(--space-24);
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+    padding: var(--space-8) var(--space-16);
+    background: var(--color-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-standard);
+}
+
+.back-button:hover {
+    background: var(--color-secondary-hover);
+    transform: translateX(-4px);
+}
+
+.report-details-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-32);
+}
+
+/* Left Panel - Report Information */
+.report-info-panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-32);
+    box-shadow: var(--shadow-md);
+}
+
+.report-title-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-24);
+    padding-bottom: var(--space-16);
+    border-bottom: 1px solid var(--color-card-border-inner);
+}
+
+.category-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-12);
+    padding: var(--space-8) var(--space-16);
+    background: var(--color-secondary);
+    border-radius: var(--radius-full);
+}
+
+.category-icon-large {
+    font-size: var(--font-size-3xl);
+}
+
+.category-name {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+.severity-badge-large {
+    padding: var(--space-8) var(--space-16);
+    border-radius: var(--radius-full);
+    color: white;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.report-info-panel h1 {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin-bottom: var(--space-24);
+    line-height: var(--line-height-tight);
+}
+
+.report-meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+    margin-bottom: var(--space-32);
+    padding: var(--space-16);
+    background: var(--color-background);
+    border-radius: var(--radius-base);
+    border: 1px solid var(--color-card-border-inner);
+}
+
+.meta-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-8);
+}
+
+.meta-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    min-width: 140px;
+}
+
+.meta-value {
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    font-family: var(--font-family-mono);
+}
+
+.report-description-section {
+    margin-bottom: var(--space-32);
+}
+
+.report-description-section h3 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--space-16);
+}
+
+.report-description-section p {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
+    white-space: pre-wrap;
+}
+
+.report-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-16);
+    padding-top: var(--space-24);
+    border-top: 1px solid var(--color-card-border-inner);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-16);
+    background: var(--color-background);
+    border-radius: var(--radius-base);
+    border: 1px solid var(--color-card-border-inner);
+}
+
+.stat-value {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Right Panel - Map */
+.report-map-panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-32);
+    box-shadow: var(--shadow-md);
+}
+
+.report-map-panel h3 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--space-16);
+}
+
+.map-container {
+    border-radius: var(--radius-base);
+    overflow: hidden;
+    border: 1px solid var(--color-card-border-inner);
+}
+
+.map-container .leaflet-container {
+    height: 500px !important;
+    width: 100%;
+}
+
+.map-popup h4 {
+    margin: 0 0 var(--space-8) 0;
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+}
+
+.map-popup p {
+    margin: var(--space-4) 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.map-popup strong {
+    color: var(--color-primary);
+}
+
+.no-location {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 500px;
+    background: var(--color-background);
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-base);
+}
+
+.no-location p {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+}
+
+.loading,
+.error-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+}
+
+.error-message {
+    flex-direction: column;
+    gap: var(--space-16);
+    color: var(--color-error);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .report-details-content {
+        grid-template-columns: 1fr;
+    }
+
+    .report-map-panel {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .report-details-container {
+        padding: var(--space-16);
+    }
+
+    .report-info-panel,
+    .report-map-panel {
+        padding: var(--space-16);
+    }
+
+    .report-info-panel h1 {
+        font-size: var(--font-size-3xl);
+    }
+
+    .report-title-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-12);
+    }
+
+    .report-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .map-container .leaflet-container {
+        height: 350px !important;
+    }
+}

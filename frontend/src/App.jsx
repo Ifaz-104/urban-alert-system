@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import CreateReport from './pages/CreateReport';
+import ReportDetails from './pages/ReportDetails';
 import './App.css';
 
 function App() {
@@ -13,14 +14,14 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in
-    const storedUser = localStorage.getItem('user');
+    // Check if user is already logged in (using sessionStorage for session-only persistence)
+    const storedUser = sessionStorage.getItem('user');
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
       } catch (error) {
         console.error('Error parsing user data:', error);
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
       }
     }
     setLoading(false);
@@ -28,6 +29,8 @@ function App() {
 
   const handleLogout = () => {
     setUser(null);
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('token');
   };
 
   if (loading) {
@@ -38,10 +41,20 @@ function App() {
     <Router>
       <Navbar user={user} onLogout={handleLogout} />
       <Routes>
-        <Route path="/" element={<Home user={user} />} />
+        {/* Redirect root to login if not authenticated, else go to Home */}
+        <Route path="/" element={user ? <Home user={user} /> : <Navigate to="/login" />} />
+
+        {/* Login page: if already logged in, redirect to Home */}
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+
+        {/* Register page: if already logged in, redirect to Home */}
         <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
+
+        {/* Protected Create Report route */}
         <Route path="/create-report" element={user ? <CreateReport /> : <Navigate to="/login" />} />
+
+        {/* Report Details route */}
+        <Route path="/report/:id" element={<ReportDetails />} />
       </Routes>
     </Router>
   );

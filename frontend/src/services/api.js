@@ -9,7 +9,7 @@ const api = axios.create({
 
 // Add token to requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -28,6 +28,7 @@ export const reportAPI = {
   createReport: (data) => api.post('/reports', data),
   getAllReports: (params) => api.get('/reports', { params }),
   getSingleReport: (id) => api.get(`/reports/${id}`),
+  getReportById: (id) => api.get(`/reports/${id}`),
   updateReport: (id, data) => api.put(`/reports/${id}`, data),
   addComment: (id, data) => api.post(`/reports/${id}/comments`, data),
 };

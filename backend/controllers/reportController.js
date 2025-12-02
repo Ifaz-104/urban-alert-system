@@ -1,4 +1,8 @@
 // backend/controllers/reportController.js
+
+// backend/controllers/reportController.js
+// ONLY THE createReport FUNCTION - rest stays the same
+
 const IncidentReport = require('../models/IncidentReport');
 const User = require('../models/User');
 
@@ -7,25 +11,45 @@ const User = require('../models/User');
 // @access  Private
 exports.createReport = async (req, res) => {
   try {
-    const { title, description, category, severity, location, latitude, longitude } = req.body;
+    const { 
+      title, 
+      description, 
+      category, 
+      severity, 
+      address, 
+      city, 
+      latitude, 
+      longitude 
+    } = req.body;
 
-    // Validation
-    if (!title || !description || !category || !location) {
+    // ✅ VALIDATION - only title, description, category required
+    if (!title || !description || !category) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields',
+        message: 'Please provide title, description, and category',
       });
     }
 
-    // Create report
+    // Build location object for GeoJSON if coordinates provided
+    let locationObject = null;
+    if (latitude && longitude) {
+      locationObject = {
+        type: 'Point',
+        coordinates: [longitude, latitude] // GeoJSON format: [lng, lat]
+      };
+    }
+
+    // Create report with new fields
     const report = await IncidentReport.create({
       title,
       description,
       category,
       severity,
-      location,
-      latitude,
-      longitude,
+      address: address || '',
+      city: city || '',
+      latitude: latitude || null,
+      longitude: longitude || null,
+      location: locationObject, // GeoJSON location
       userId: req.userId,
       status: 'pending',
       isVerified: false,
@@ -54,9 +78,13 @@ exports.createReport = async (req, res) => {
   }
 };
 
-// @desc    Get all incident reports
-// @route   GET /api/reports
-// @access  Public
+// Rest of your controller functions stay the same...
+// (getAllReports, getSingleReport, updateReport, addComment, etc.)
+
+
+// @desc Get all incident reports
+// @route GET /api/reports
+// @access Public
 exports.getAllReports = async (req, res) => {
   try {
     const { category, status, severity, sortBy = '-createdAt' } = req.query;
@@ -78,8 +106,9 @@ exports.getAllReports = async (req, res) => {
 
     // Get reports with filters and sorting
     const reports = await IncidentReport.find(filter)
-      .populate('userId', 'username email points')
-      .populate('comments.userId', 'username email')
+      .populate('userId', 'username email firstName lastName points')
+      .populate('comments.userId', 'username email firstName lastName')
+      .populate('verifiedBy', 'username email firstName lastName')
       .sort(sortBy)
       .lean();
 
@@ -88,8 +117,9 @@ exports.getAllReports = async (req, res) => {
       count: reports.length,
       data: reports,
     });
+
   } catch (error) {
-    console.error(error);
+    console.error('Error in getAllReports:', error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -97,15 +127,15 @@ exports.getAllReports = async (req, res) => {
   }
 };
 
-// @desc    Get single incident report
-// @route   GET /api/reports/:id
-// @access  Public
+// @desc Get single incident report
+// @route GET /api/reports/:id
+// @access Public
 exports.getSingleReport = async (req, res) => {
   try {
     const report = await IncidentReport.findById(req.params.id)
-      .populate('userId', 'username email points')
-      .populate('comments.userId', 'username email')
-      .populate('verifiedBy', 'username email');
+      .populate('userId', 'username email firstName lastName points')
+      .populate('comments.userId', 'username email firstName lastName')
+      .populate('verifiedBy', 'username email firstName lastName');
 
     if (!report) {
       return res.status(404).json({
@@ -118,8 +148,9 @@ exports.getSingleReport = async (req, res) => {
       success: true,
       data: report,
     });
+
   } catch (error) {
-    console.error(error);
+    console.error('Error in getSingleReport:', error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -127,9 +158,9 @@ exports.getSingleReport = async (req, res) => {
   }
 };
 
-// @desc    Update incident report (User can update own reports)
-// @route   PUT /api/reports/:id
-// @access  Private
+// @desc Update incident report (User can update own reports)
+// @route PUT /api/reports/:id
+// @access Private
 exports.updateReport = async (req, res) => {
   try {
     let report = await IncidentReport.findById(req.params.id);
@@ -151,23 +182,44 @@ exports.updateReport = async (req, res) => {
 
     // Update fields
     const updateData = {};
+
     if (req.body.title) updateData.title = req.body.title;
     if (req.body.description) updateData.description = req.body.description;
     if (req.body.severity) updateData.severity = req.body.severity;
     if (req.body.status) updateData.status = req.body.status;
+    if (req.body.address) updateData.address = req.body.address;
+    if (req.body.city) updateData.city = req.body.city;
+
+    // ✨ Update coordinates if provided
+    if (req.body.latitude && req.body.longitude) {
+      const lat = parseFloat(req.body.latitude);
+      const lng = parseFloat(req.body.longitude);
+
+      if (!isNaN(lat) && !isNaN(lng)) {
+        if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+          updateData.latitude = lat;
+          updateData.longitude = lng;
+          updateData.location = {
+            type: 'Point',
+            coordinates: [lng, lat]
+          };
+        }
+      }
+    }
 
     report = await IncidentReport.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true,
-    }).populate('userId', 'username email');
+    }).populate('userId', 'username email firstName lastName');
 
     res.status(200).json({
       success: true,
       message: 'Report updated successfully',
       data: report,
     });
+
   } catch (error) {
-    console.error(error);
+    console.error('Error in updateReport:', error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -175,9 +227,48 @@ exports.updateReport = async (req, res) => {
   }
 };
 
-// @desc    Add comment to report
-// @route   POST /api/reports/:id/comments
-// @access  Private
+// @desc Delete incident report
+// @route DELETE /api/reports/:id
+// @access Private
+exports.deleteReport = async (req, res) => {
+  try {
+    const report = await IncidentReport.findById(req.params.id);
+
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: 'Report not found',
+      });
+    }
+
+    // Check if user is the report creator
+    if (report.userId.toString() !== req.userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to delete this report',
+      });
+    }
+
+    await IncidentReport.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Report deleted successfully',
+      data: {},
+    });
+
+  } catch (error) {
+    console.error('Error in deleteReport:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// @desc Add comment to report
+// @route POST /api/reports/:id/comments
+// @access Private
 exports.addComment = async (req, res) => {
   try {
     const { content } = req.body;
@@ -198,6 +289,7 @@ exports.addComment = async (req, res) => {
       });
     }
 
+    // Add comment to array
     report.comments.push({
       userId: req.userId,
       content,
@@ -207,10 +299,12 @@ exports.addComment = async (req, res) => {
 
     // Award points for commenting
     const user = await User.findById(req.userId);
-    user.points += 2;
-    await user.save();
+    if (user) {
+      user.points = (user.points || 0) + 2;
+      await user.save();
+    }
 
-    await report.populate('comments.userId', 'username email');
+    await report.populate('comments.userId', 'username email firstName lastName');
 
     res.status(201).json({
       success: true,
@@ -218,8 +312,64 @@ exports.addComment = async (req, res) => {
       data: report,
       pointsAwarded: 2,
     });
+
   } catch (error) {
-    console.error(error);
+    console.error('Error in addComment:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ✨ NEW: Get nearby incidents (geospatial query)
+// @route GET /api/reports/nearby?lat=X&lng=Y&radius=R
+// @access Public
+exports.getNearbyIncidents = async (req, res) => {
+  try {
+    const { lat, lng, radius = 10000 } = req.query; // radius in meters, default 10km
+
+    if (!lat || !lng) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide latitude and longitude',
+      });
+    }
+
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lng);
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid coordinates',
+      });
+    }
+
+    // Geospatial query using GeoJSON
+    const reports = await IncidentReport.find({
+      location: {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [longitude, latitude]
+          },
+          $maxDistance: parseInt(radius)
+        }
+      }
+    })
+      .populate('userId', 'username email firstName lastName points')
+      .populate('comments.userId', 'username email firstName lastName')
+      .limit(20);
+
+    res.status(200).json({
+      success: true,
+      count: reports.length,
+      data: reports,
+    });
+
+  } catch (error) {
+    console.error('Error in getNearbyIncidents:', error);
     res.status(500).json({
       success: false,
       message: error.message,

@@ -1,4 +1,5 @@
 // backend/models/IncidentReport.js
+
 const mongoose = require('mongoose');
 
 const incidentReportSchema = new mongoose.Schema(
@@ -14,7 +15,7 @@ const incidentReportSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['accident', 'fire', 'flood', 'crime', 'pollution', 'other'],
+      enum: ['accident', 'fire', 'flood', 'crime', 'pollution', 'earthquake', 'cyclone', 'other'],
       required: true,
     },
     severity: {
@@ -22,17 +23,55 @@ const incidentReportSchema = new mongoose.Schema(
       enum: ['low', 'medium', 'high', 'critical'],
       default: 'medium',
     },
-    location: {
+
+    // 📍 Location Fields
+    locationName: {
       type: String,
-      required: [true, 'Please provide a location'],
+      default: '',
     },
-    latitude: Number,
-    longitude: Number,
+
+    address: {
+      type: String,
+      default: '',
+    },
+
+    city: {
+      type: String,
+      default: '',
+    },
+
+    // Geospatial location (GeoJSON Point)
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        sparse: true
+      }
+    },
+
+    // Raw coordinates for easy access
+    latitude: {
+      type: Number,
+      sparse: true
+    },
+
+    longitude: {
+      type: Number,
+      sparse: true
+    },
+
+    // User Reference
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
+
+    // Status Fields
     status: {
       type: String,
       enum: ['pending', 'verified', 'resolved', 'rejected'],
@@ -46,7 +85,11 @@ const incidentReportSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+
+    // Media
     mediaUrls: [String],
+
+    // Comments
     comments: [
       {
         userId: {
@@ -60,6 +103,8 @@ const incidentReportSchema = new mongoose.Schema(
         },
       },
     ],
+
+    // Engagement
     upvotes: {
       type: Number,
       default: 0,
@@ -68,6 +113,8 @@ const incidentReportSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+
+    // Timestamps
     createdAt: {
       type: Date,
       default: Date.now,
@@ -79,5 +126,14 @@ const incidentReportSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// 🔍 CREATE INDEXES
+// Geospatial index for location-based queries
+incidentReportSchema.index({ location: '2dsphere' });
+
+// Regular indexes for filtering
+incidentReportSchema.index({ latitude: 1, longitude: 1 });
+incidentReportSchema.index({ userId: 1 });
+incidentReportSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('IncidentReport', incidentReportSchema);

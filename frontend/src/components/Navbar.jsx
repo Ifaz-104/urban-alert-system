@@ -1,13 +1,14 @@
 // frontend/src/components/Navbar.jsx
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
 
 export default function Navbar({ user, onLogout }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
     onLogout();
     navigate('/login');
   };
@@ -19,9 +20,11 @@ export default function Navbar({ user, onLogout }) {
           🚨 Urban Alert
         </h1>
         <div className="nav-links">
-          <button onClick={() => navigate('/')} className="nav-btn">
-            Home
-          </button>
+          {location.pathname !== '/login' && (
+            <button onClick={() => navigate('/')} className="nav-btn">
+              Home
+            </button>
+          )}
           {user ? (
             <>
               <button onClick={() => navigate('/create-report')} className="nav-btn btn-primary">

@@ -48,6 +48,8 @@ export default function Home({ user }) {
       flood: '💧',
       crime: '🚨',
       pollution: '💨',
+      earthquake: '🌍',
+      cyclone: '🌀',
       other: '⚠️',
     };
     return icons[category] || '📍';
@@ -85,6 +87,8 @@ export default function Home({ user }) {
             <option value="flood">Flood</option>
             <option value="crime">Crime</option>
             <option value="pollution">Pollution</option>
+            <option value="earthquake">Earthquake</option>
+            <option value="cyclone">Cyclone</option>
             <option value="other">Other</option>
           </select>
 
@@ -133,7 +137,7 @@ export default function Home({ user }) {
                 <p className="report-description">{report.description.substring(0, 100)}...</p>
 
                 <div className="report-info">
-                  <span>📍 {report.location}</span>
+                  <span>📍 {report.address || report.city || 'Unknown Location'}</span>
                   <span>👤 {report.userId.username}</span>
                 </div>
 
