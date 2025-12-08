@@ -25,6 +25,11 @@ export default function ReportDetails() {
     const [report, setReport] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [userVote, setUserVote] = useState(null); // 'upvote', 'downvote', or null
+    const [votingLoading, setVotingLoading] = useState(false);
+
+    // Get current user from sessionStorage
+    const currentUser = JSON.parse(sessionStorage.getItem('user') || '{}');
 
     useEffect(() => {
         fetchReportDetails();
@@ -34,7 +39,17 @@ export default function ReportDetails() {
         try {
             setLoading(true);
             const response = await reportAPI.getReportById(id);
-            setReport(response.data.data);
+            const reportData = response.data.data;
+            setReport(reportData);
+
+            // Check if current user has voted
+            if (currentUser.id) {
+                if (reportData.upvotedBy?.includes(currentUser.id)) {
+                    setUserVote('upvote');
+                } else if (reportData.downvotedBy?.includes(currentUser.id)) {
+                    setUserVote('downvote');
+                }
+            }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to fetch report details');
         } finally {
@@ -64,6 +79,60 @@ export default function ReportDetails() {
             critical: '#f44336',
         };
         return colors[severity] || '#999';
+    };
+
+    const handleUpvote = async () => {
+        if (!currentUser.id) {
+            alert('Please login to vote');
+            navigate('/login');
+            return;
+        }
+
+        try {
+            setVotingLoading(true);
+            const response = await reportAPI.upvoteReport(id);
+
+            // Update local state
+            setReport(prev => ({
+                ...prev,
+                upvotes: response.data.data.upvotes,
+                downvotes: response.data.data.downvotes,
+            }));
+
+            setUserVote(response.data.data.userVote);
+        } catch (err) {
+            console.error('Error upvoting:', err);
+            alert(err.response?.data?.message || 'Failed to upvote');
+        } finally {
+            setVotingLoading(false);
+        }
+    };
+
+    const handleDownvote = async () => {
+        if (!currentUser.id) {
+            alert('Please login to vote');
+            navigate('/login');
+            return;
+        }
+
+        try {
+            setVotingLoading(true);
+            const response = await reportAPI.downvoteReport(id);
+
+            // Update local state
+            setReport(prev => ({
+                ...prev,
+                upvotes: response.data.data.upvotes,
+                downvotes: response.data.data.downvotes,
+            }));
+
+            setUserVote(response.data.data.userVote);
+        } catch (err) {
+            console.error('Error downvoting:', err);
+            alert(err.response?.data?.message || 'Failed to downvote');
+        } finally {
+            setVotingLoading(false);
+        }
     };
 
     if (loading) {
@@ -139,11 +208,33 @@ export default function ReportDetails() {
                         <p>{report.description}</p>
                     </div>
 
-                    <div className="report-stats">
-                        <div className="stat-item">
-                            <span className="stat-value">{report.upvotes}</span>
-                            <span className="stat-label">Upvotes</span>
+                    {/* Voting Section */}
+                    <div className="voting-section">
+                        <h3>Community Feedback</h3>
+                        <div className="voting-buttons">
+                            <button
+                                className={`vote-btn upvote-btn ${userVote === 'upvote' ? 'active' : ''}`}
+                                onClick={handleUpvote}
+                                disabled={votingLoading}
+                            >
+                                <span className="vote-icon">👍</span>
+                                <span className="vote-count">{report.upvotes || 0}</span>
+                                <span className="vote-label">Upvote</span>
+                            </button>
+
+                            <button
+                                className={`vote-btn downvote-btn ${userVote === 'downvote' ? 'active' : ''}`}
+                                onClick={handleDownvote}
+                                disabled={votingLoading}
+                            >
+                                <span className="vote-icon">👎</span>
+                                <span className="vote-count">{report.downvotes || 0}</span>
+                                <span className="vote-label">Downvote</span>
+                            </button>
                         </div>
+                    </div>
+
+                    <div className="report-stats">
                         <div className="stat-item">
                             <span className="stat-value">{report.comments.length}</span>
                             <span className="stat-label">Comments</span>

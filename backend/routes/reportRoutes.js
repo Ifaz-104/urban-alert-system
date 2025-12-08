@@ -7,6 +7,8 @@ const {
   getSingleReport,
   updateReport,
   addComment,
+  upvoteReport,
+  downvoteReport,
 } = require('../controllers/reportController');
 const { protect } = require('../middleware/auth');
 
@@ -18,5 +20,7 @@ router.get('/:id', getSingleReport);
 router.post('/', protect, createReport);
 router.put('/:id', protect, updateReport);
 router.post('/:id/comments', protect, addComment);
+router.post('/:id/upvote', protect, upvoteReport);
+router.post('/:id/downvote', protect, downvoteReport);
 
 module.exports = router;

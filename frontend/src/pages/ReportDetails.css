@@ -141,9 +141,111 @@
     white-space: pre-wrap;
 }
 
+/* Voting Section */
+.voting-section {
+    margin-bottom: var(--space-32);
+    padding: var(--space-24);
+    background: var(--color-background);
+    border-radius: var(--radius-base);
+    border: 1px solid var(--color-card-border-inner);
+}
+
+.voting-section h3 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--space-16);
+}
+
+.voting-buttons {
+    display: flex;
+    gap: var(--space-16);
+}
+
+.vote-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-8);
+    padding: var(--space-20);
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-base);
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-standard);
+    font-family: inherit;
+}
+
+.vote-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.vote-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.vote-icon {
+    font-size: var(--font-size-4xl);
+}
+
+.vote-count {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+}
+
+.vote-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.upvote-btn {
+    border-color: #4caf50;
+}
+
+.upvote-btn:hover:not(:disabled) {
+    background: rgba(76, 175, 80, 0.1);
+    border-color: #4caf50;
+}
+
+.upvote-btn.active {
+    background: #4caf50;
+    border-color: #4caf50;
+}
+
+.upvote-btn.active .vote-count,
+.upvote-btn.active .vote-label {
+    color: white;
+}
+
+.downvote-btn {
+    border-color: #f44336;
+}
+
+.downvote-btn:hover:not(:disabled) {
+    background: rgba(244, 67, 54, 0.1);
+    border-color: #f44336;
+}
+
+.downvote-btn.active {
+    background: #f44336;
+    border-color: #f44336;
+}
+
+.downvote-btn.active .vote-count,
+.downvote-btn.active .vote-label {
+    color: white;
+}
+
 .report-stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--space-16);
     padding-top: var(--space-24);
     border-top: 1px solid var(--color-card-border-inner);

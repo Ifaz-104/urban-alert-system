@@ -143,7 +143,11 @@ export default function Home({ user }) {
 
                 <div className="report-footer">
                   <span>{new Date(report.createdAt).toLocaleDateString()}</span>
-                  <span>💬 {report.comments.length} comments</span>
+                  <div className="report-engagement">
+                    <span>👍 {report.upvotes || 0}</span>
+                    <span>👎 {report.downvotes || 0}</span>
+                    <span>💬 {report.comments.length}</span>
+                  </div>
                 </div>
               </div>
             ))}

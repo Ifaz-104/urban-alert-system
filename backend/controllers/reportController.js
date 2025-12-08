@@ -11,15 +11,15 @@ const User = require('../models/User');
 // @access  Private
 exports.createReport = async (req, res) => {
   try {
-    const { 
-      title, 
-      description, 
-      category, 
-      severity, 
-      address, 
-      city, 
-      latitude, 
-      longitude 
+    const {
+      title,
+      description,
+      category,
+      severity,
+      address,
+      city,
+      latitude,
+      longitude
     } = req.body;
 
     // ✅ VALIDATION - only title, description, category required
@@ -370,6 +370,120 @@ exports.getNearbyIncidents = async (req, res) => {
 
   } catch (error) {
     console.error('Error in getNearbyIncidents:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// @desc Upvote a report
+// @route POST /api/reports/:id/upvote
+// @access Private
+exports.upvoteReport = async (req, res) => {
+  try {
+    const report = await IncidentReport.findById(req.params.id);
+
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: 'Report not found',
+      });
+    }
+
+    const userId = req.userId;
+
+    // Check if user already upvoted
+    const alreadyUpvoted = report.upvotedBy.includes(userId);
+    const alreadyDownvoted = report.downvotedBy.includes(userId);
+
+    if (alreadyUpvoted) {
+      // Remove upvote
+      report.upvotedBy = report.upvotedBy.filter(id => id.toString() !== userId);
+      report.upvotes = Math.max(0, report.upvotes - 1);
+    } else {
+      // If previously downvoted, remove downvote first
+      if (alreadyDownvoted) {
+        report.downvotedBy = report.downvotedBy.filter(id => id.toString() !== userId);
+        report.downvotes = Math.max(0, report.downvotes - 1);
+      }
+
+      // Add upvote
+      report.upvotedBy.push(userId);
+      report.upvotes += 1;
+    }
+
+    await report.save();
+
+    res.status(200).json({
+      success: true,
+      message: alreadyUpvoted ? 'Upvote removed' : 'Report upvoted',
+      data: {
+        upvotes: report.upvotes,
+        downvotes: report.downvotes,
+        userVote: alreadyUpvoted ? null : 'upvote',
+      },
+    });
+
+  } catch (error) {
+    console.error('Error in upvoteReport:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// @desc Downvote a report
+// @route POST /api/reports/:id/downvote
+// @access Private
+exports.downvoteReport = async (req, res) => {
+  try {
+    const report = await IncidentReport.findById(req.params.id);
+
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: 'Report not found',
+      });
+    }
+
+    const userId = req.userId;
+
+    // Check if user already downvoted
+    const alreadyDownvoted = report.downvotedBy.includes(userId);
+    const alreadyUpvoted = report.upvotedBy.includes(userId);
+
+    if (alreadyDownvoted) {
+      // Remove downvote
+      report.downvotedBy = report.downvotedBy.filter(id => id.toString() !== userId);
+      report.downvotes = Math.max(0, report.downvotes - 1);
+    } else {
+      // If previously upvoted, remove upvote first
+      if (alreadyUpvoted) {
+        report.upvotedBy = report.upvotedBy.filter(id => id.toString() !== userId);
+        report.upvotes = Math.max(0, report.upvotes - 1);
+      }
+
+      // Add downvote
+      report.downvotedBy.push(userId);
+      report.downvotes += 1;
+    }
+
+    await report.save();
+
+    res.status(200).json({
+      success: true,
+      message: alreadyDownvoted ? 'Downvote removed' : 'Report downvoted',
+      data: {
+        upvotes: report.upvotes,
+        downvotes: report.downvotes,
+        userVote: alreadyDownvoted ? null : 'downvote',
+      },
+    });
+
+  } catch (error) {
+    console.error('Error in downvoteReport:', error);
     res.status(500).json({
       success: false,
       message: error.message,
