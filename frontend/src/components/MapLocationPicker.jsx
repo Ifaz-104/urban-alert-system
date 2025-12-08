@@ -164,12 +164,14 @@ export default function MapLocationPicker({ onLocationSelect, defaultLocation })
 
               <div className="location-actions">
                 <button
+                  type="button"
                   onClick={handleUseCurrentLocation}
                   className="btn btn--sm btn--secondary"
                 >
                   Use Current Location
                 </button>
                 <button
+                  type="button"
                   onClick={handleClearLocation}
                   className="btn btn--sm btn--outline"
                 >
@@ -188,6 +190,7 @@ export default function MapLocationPicker({ onLocationSelect, defaultLocation })
                 Click on the map to select incident location
               </div>
               <button
+                type="button"
                 onClick={handleUseCurrentLocation}
                 className="btn btn--sm btn--primary"
               >
