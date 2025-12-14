@@ -28,6 +28,8 @@ export default function ReportDetails() {
     const [userVote, setUserVote] = useState(null); // 'upvote', 'downvote', or null
     const [votingLoading, setVotingLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [commentText, setCommentText] = useState('');
+    const [commentLoading, setCommentLoading] = useState(false);
 
     // Get current user from sessionStorage
     const currentUser = JSON.parse(sessionStorage.getItem('user') || '{}');
@@ -133,6 +135,42 @@ export default function ReportDetails() {
             alert(err.response?.data?.message || 'Failed to downvote');
         } finally {
             setVotingLoading(false);
+        }
+    };
+
+    const handleAddComment = async (e) => {
+        e.preventDefault();
+
+        if (!currentUser.id) {
+            alert('Please login to comment');
+            navigate('/login');
+            return;
+        }
+
+        if (!commentText.trim()) {
+            alert('Please enter a comment');
+            return;
+        }
+
+        try {
+            setCommentLoading(true);
+            const response = await reportAPI.addComment(id, {
+                content: commentText.trim()
+            });
+
+            // Update report with new comment
+            setReport(response.data.data);
+            setCommentText('');
+            
+            // Show success message with points
+            if (response.data.pointsAwarded) {
+                alert(`Comment added! You earned ${response.data.pointsAwarded} points!`);
+            }
+        } catch (err) {
+            console.error('Error adding comment:', err);
+            alert(err.response?.data?.message || 'Failed to add comment');
+        } finally {
+            setCommentLoading(false);
         }
     };
 
@@ -313,6 +351,65 @@ export default function ReportDetails() {
                         <div className="stat-item">
                             <span className="stat-value">{report.status}</span>
                             <span className="stat-label">Status</span>
+                        </div>
+                    </div>
+
+                    {/* Comments Section */}
+                    <div className="comments-section">
+                        <h3>💬 Comments ({report.comments.length})</h3>
+
+                        {/* Comment Form */}
+                        {currentUser.id ? (
+                            <form onSubmit={handleAddComment} className="comment-form">
+                                <textarea
+                                    value={commentText}
+                                    onChange={(e) => setCommentText(e.target.value)}
+                                    placeholder="Share your thoughts or updates about this report..."
+                                    rows="3"
+                                    maxLength={500}
+                                    className="comment-input"
+                                />
+                                <div className="comment-form-footer">
+                                    <span className="char-count">
+                                        {commentText.length}/500
+                                    </span>
+                                    <button
+                                        type="submit"
+                                        disabled={commentLoading || !commentText.trim()}
+                                        className="btn-comment-submit"
+                                    >
+                                        {commentLoading ? '📤 Posting...' : '📤 Post Comment'}
+                                    </button>
+                                </div>
+                            </form>
+                        ) : (
+                            <div className="comment-login-prompt">
+                                <p>👋 Please <button onClick={() => navigate('/login')} className="link-button">log in</button> to comment</p>
+                            </div>
+                        )}
+
+                        {/* Comments Display */}
+                        <div className="comments-list">
+                            {report.comments && report.comments.length > 0 ? (
+                                report.comments.map((comment, index) => (
+                                    <div key={index} className="comment-item">
+                                        <div className="comment-header">
+                                            <span className="comment-author">👤 {comment.userId?.username || 'Anonymous'}</span>
+                                            <span className="comment-date">
+                                                {new Date(comment.createdAt).toLocaleDateString()} {new Date(comment.createdAt).toLocaleTimeString([], {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </span>
+                                        </div>
+                                        <p className="comment-content">{comment.content}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="no-comments">
+                                    <p>No comments yet. Be the first to comment! 💭</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
