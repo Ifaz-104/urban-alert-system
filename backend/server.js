@@ -13,9 +13,13 @@ connectDB();
 app.use(express.json());
 app.use(cors());
 
+// Serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
+
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
+app.use('/api/upload', require('./routes/uploadRoutes'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

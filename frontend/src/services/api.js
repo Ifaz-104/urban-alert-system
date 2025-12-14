@@ -35,4 +35,20 @@ export const reportAPI = {
   downvoteReport: (id) => api.post(`/reports/${id}/downvote`),
 };
 
+// Upload API calls
+export const uploadAPI = {
+  uploadFiles: (files) => {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+    return api.post('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  deleteFile: (filename) => api.delete(`/upload/${filename}`),
+};
+
 export default api;

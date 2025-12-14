@@ -208,6 +208,35 @@ export default function ReportDetails() {
                         <p>{report.description}</p>
                     </div>
 
+                    {/* Media Gallery Section */}
+                    {report.mediaUrls && report.mediaUrls.length > 0 && (
+                        <div className="media-gallery-section">
+                            <h3>📸 Media Attachments ({report.mediaUrls.length})</h3>
+                            <div className="media-gallery-grid">
+                                {report.mediaUrls.map((url, index) => {
+                                    const isVideo = url.includes('.mp4') || url.includes('.mpeg') || url.includes('.mov') || url.includes('.avi');
+                                    return (
+                                        <div key={index} className="media-gallery-item">
+                                            {isVideo ? (
+                                                <video
+                                                    controls
+                                                    width="100%"
+                                                    height="auto"
+                                                    style={{ borderRadius: '6px' }}
+                                                >
+                                                    <source src={`http://localhost:5000${url}`} type="video/mp4" />
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            ) : (
+                                                <img src={`http://localhost:5000${url}`} alt={`Report media ${index}`} />
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Voting Section */}
                     <div className="voting-section">
                         <h3>Community Feedback</h3>

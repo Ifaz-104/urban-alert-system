@@ -19,7 +19,8 @@ exports.createReport = async (req, res) => {
       address,
       city,
       latitude,
-      longitude
+      longitude,
+      mediaUrls = [],
     } = req.body;
 
     // ✅ VALIDATION - only title, description, category required
@@ -50,6 +51,7 @@ exports.createReport = async (req, res) => {
       latitude: latitude || null,
       longitude: longitude || null,
       location: locationObject, // GeoJSON location
+      mediaUrls: Array.isArray(mediaUrls) ? mediaUrls : [],
       userId: req.userId,
       status: 'pending',
       isVerified: false,
