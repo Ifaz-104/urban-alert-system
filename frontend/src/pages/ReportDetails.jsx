@@ -27,6 +27,7 @@ export default function ReportDetails() {
     const [error, setError] = useState('');
     const [userVote, setUserVote] = useState(null); // 'upvote', 'downvote', or null
     const [votingLoading, setVotingLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     // Get current user from sessionStorage
     const currentUser = JSON.parse(sessionStorage.getItem('user') || '{}');
@@ -135,6 +136,33 @@ export default function ReportDetails() {
         }
     };
 
+    const handleDeleteReport = async () => {
+        // Check if user is the report creator
+        if (report.userId._id !== currentUser.id) {
+            alert('You can only delete your own reports');
+            return;
+        }
+
+        // Confirm deletion
+        if (!window.confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            setDeleteLoading(true);
+            await reportAPI.deleteReport(id);
+            
+            // Show success message and redirect
+            alert('Report deleted successfully');
+            navigate('/');
+        } catch (err) {
+            console.error('Error deleting report:', err);
+            alert(err.response?.data?.message || 'Failed to delete report');
+        } finally {
+            setDeleteLoading(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="report-details-container">
@@ -146,10 +174,12 @@ export default function ReportDetails() {
     if (error || !report) {
         return (
             <div className="report-details-container">
+                <div className="report-details-header">
+                    <button onClick={() => navigate('/')} className="back-button">
+                        ← Back to Reports
+                    </button>
+                </div>
                 <div className="error-message">{error || 'Report not found'}</div>
-                <button onClick={() => navigate('/')} className="btn btn--primary">
-                    Back to Home
-                </button>
             </div>
         );
     }
@@ -157,9 +187,21 @@ export default function ReportDetails() {
     return (
         <div className="report-details-container">
             <div className="report-details-header">
-                <button onClick={() => navigate('/')} className="back-button">
-                    ← Back to Reports
-                </button>
+                <div className="header-buttons">
+                    <button onClick={() => navigate('/')} className="back-button">
+                        ← Back to Reports
+                    </button>
+                    {currentUser.id === report.userId._id && (
+                        <button
+                            onClick={handleDeleteReport}
+                            disabled={deleteLoading}
+                            className="delete-button"
+                            title="Delete this report"
+                        >
+                            {deleteLoading ? '🗑️ Deleting...' : '🗑️ Delete Report'}
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="report-details-content">

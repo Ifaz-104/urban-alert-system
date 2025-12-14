@@ -6,6 +6,7 @@ const {
   getAllReports,
   getSingleReport,
   updateReport,
+  deleteReport,
   addComment,
   upvoteReport,
   downvoteReport,
@@ -19,6 +20,7 @@ router.get('/:id', getSingleReport);
 // Protected routes
 router.post('/', protect, createReport);
 router.put('/:id', protect, updateReport);
+router.delete('/:id', protect, deleteReport);
 router.post('/:id/comments', protect, addComment);
 router.post('/:id/upvote', protect, upvoteReport);
 router.post('/:id/downvote', protect, downvoteReport);

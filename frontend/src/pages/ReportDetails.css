@@ -10,6 +10,15 @@
 
 .report-details-header {
     margin-bottom: var(--space-24);
+    display: flex;
+    align-items: center;
+    gap: var(--space-16);
+}
+
+.header-buttons {
+    display: flex;
+    gap: var(--space-12);
+    align-items: center;
 }
 
 .back-button {
@@ -30,6 +39,32 @@
 .back-button:hover {
     background: var(--color-secondary-hover);
     transform: translateX(-4px);
+}
+
+.delete-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+    padding: var(--space-8) var(--space-16);
+    background: rgba(255, 87, 87, 0.1);
+    color: #ff5757;
+    border: 1px solid rgba(255, 87, 87, 0.3);
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-standard);
+}
+
+.delete-button:hover:not(:disabled) {
+    background: rgba(255, 87, 87, 0.2);
+    border-color: rgba(255, 87, 87, 0.5);
+    transform: translateY(-2px);
+}
+
+.delete-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .report-details-content {

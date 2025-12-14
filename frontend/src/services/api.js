@@ -30,6 +30,7 @@ export const reportAPI = {
   getSingleReport: (id) => api.get(`/reports/${id}`),
   getReportById: (id) => api.get(`/reports/${id}`),
   updateReport: (id, data) => api.put(`/reports/${id}`, data),
+  deleteReport: (id) => api.delete(`/reports/${id}`),
   addComment: (id, data) => api.post(`/reports/${id}/comments`, data),
   upvoteReport: (id) => api.post(`/reports/${id}/upvote`),
   downvoteReport: (id) => api.post(`/reports/${id}/downvote`),
