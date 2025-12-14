@@ -1,0 +1,122 @@
+/* frontend/src/components/EmergencySOS.css */
+
+:root {
+  --color-danger: #e74c3c;
+  --color-danger-hover: #c0392b;
+  --color-success: #27ae60;
+  --duration-normal: 200ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.emergency-sos-container {
+  position: relative;
+}
+
+.emergency-sos-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-danger) 0%, var(--color-danger-hover) 100%);
+  color: white;
+  border: 3px solid white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
+  transition: all var(--duration-normal) var(--ease-standard);
+  z-index: 50;
+  animation: pulse-button 2s ease-in-out infinite;
+}
+
+@keyframes pulse-button {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 8px 30px rgba(231, 76, 60, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
+  }
+}
+
+.emergency-sos-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 30px rgba(231, 76, 60, 0.5);
+}
+
+.emergency-sos-btn:active {
+  transform: scale(0.95);
+}
+
+.sos-icon {
+  font-size: 24px;
+}
+
+.sos-text {
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.sos-tooltip {
+  position: absolute;
+  bottom: 75px;
+  right: 0;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  animation: fadeInUp 200ms var(--ease-standard);
+  pointer-events: none;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .emergency-sos-btn {
+    width: 56px;
+    height: 56px;
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .sos-icon {
+    font-size: 22px;
+  }
+
+  .sos-text {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .emergency-sos-btn {
+    width: 56px;
+    height: 56px;
+    bottom: 16px;
+    right: 16px;
+  }
+}

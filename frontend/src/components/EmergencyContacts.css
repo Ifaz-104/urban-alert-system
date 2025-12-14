@@ -1,0 +1,472 @@
+/* frontend/src/components/EmergencyContacts.css */
+
+:root {
+  --color-primary: #2180d0;
+  --color-primary-hover: #1a65a0;
+  --color-secondary: #f5f5f5;
+  --color-surface: #ffffff;
+  --color-text: #2c3e50;
+  --color-text-secondary: #7f8c8d;
+  --color-border: #e0e0e0;
+  --color-danger: #e74c3c;
+  --color-success: #27ae60;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --radius-base: 6px;
+  --radius-lg: 12px;
+  --duration-normal: 200ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.emergency-contacts-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  animation: fadeIn 200ms var(--ease-standard);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.emergency-contacts-modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 300ms var(--ease-standard);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.emergency-contacts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-24);
+  border-bottom: 2px solid var(--color-border);
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.emergency-contacts-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.emergency-close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-normal) var(--ease-standard);
+}
+
+.emergency-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: rotate(90deg);
+}
+
+.emergency-contacts-filters {
+  display: flex;
+  gap: var(--space-8);
+  padding: var(--space-16);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  background: var(--color-secondary);
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-12);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--duration-normal) var(--ease-standard);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.filter-btn:hover {
+  border-color: var(--color-primary);
+  background: rgba(33, 128, 208, 0.05);
+}
+
+.filter-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.filter-icon {
+  font-size: 18px;
+}
+
+.filter-label {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .filter-label {
+    display: inline;
+  }
+}
+
+.emergency-contacts-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-24);
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: var(--space-16);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p,
+.error-state p,
+.empty-state p {
+  color: var(--color-text-secondary);
+  font-size: 16px;
+}
+
+.retry-btn {
+  padding: var(--space-8) var(--space-20);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all var(--duration-normal) var(--ease-standard);
+}
+
+.retry-btn:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-2px);
+}
+
+.contacts-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-16);
+}
+
+.contact-card {
+  background: var(--color-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-20);
+  transition: all var(--duration-normal) var(--ease-standard);
+}
+
+.contact-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 8px 24px rgba(33, 128, 208, 0.15);
+  transform: translateY(-4px);
+}
+
+.contact-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12);
+  margin-bottom: var(--space-12);
+}
+
+.contact-icon {
+  font-size: 32px;
+  min-width: 40px;
+  text-align: center;
+}
+
+.contact-info {
+  flex: 1;
+}
+
+.contact-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.contact-type {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.contact-description {
+  margin: 0 0 var(--space-12) 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin-bottom: var(--space-16);
+  padding-bottom: var(--space-16);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-size: 14px;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 50px;
+}
+
+.detail-value {
+  color: var(--color-text);
+  word-break: break-all;
+}
+
+.detail-item.availability {
+  justify-content: flex-start;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-24x7 {
+  background: rgba(39, 174, 96, 0.2);
+  color: var(--color-success);
+}
+
+.contact-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-8);
+}
+
+.action-btn {
+  padding: var(--space-10) var(--space-12);
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all var(--duration-normal) var(--ease-standard);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+}
+
+.call-btn {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.call-btn:hover {
+  background: rgba(39, 174, 96, 0.1);
+  border-color: var(--color-success);
+}
+
+.message-btn {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.message-btn:hover {
+  background: rgba(33, 128, 208, 0.1);
+  border-color: var(--color-primary);
+}
+
+.email-btn {
+  border-color: #9b59b6;
+  color: #9b59b6;
+}
+
+.email-btn:hover {
+  background: rgba(155, 89, 182, 0.1);
+  border-color: #9b59b6;
+}
+
+.web-btn {
+  border-color: #f39c12;
+  color: #f39c12;
+}
+
+.web-btn:hover {
+  background: rgba(243, 156, 18, 0.1);
+  border-color: #f39c12;
+}
+
+.emergency-contacts-footer {
+  padding: var(--space-16) var(--space-24);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-secondary);
+  text-align: center;
+}
+
+.footer-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+/* Scrollbar styling */
+.emergency-contacts-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.emergency-contacts-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.emergency-contacts-content::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.emergency-contacts-content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .emergency-contacts-modal {
+    width: 95%;
+    max-height: 95vh;
+    border-radius: 16px;
+  }
+
+  .emergency-contacts-header {
+    padding: var(--space-16);
+  }
+
+  .emergency-contacts-header h2 {
+    font-size: 20px;
+  }
+
+  .emergency-contacts-content {
+    padding: var(--space-16);
+  }
+
+  .contacts-list {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .emergency-contacts-filters {
+    padding: var(--space-12);
+  }
+
+  .filter-btn {
+    padding: var(--space-8) var(--space-10);
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .emergency-contacts-modal {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  .emergency-contacts-modal-overlay {
+    align-items: flex-end;
+  }
+
+  .contact-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .action-btn {
+    width: 100%;
+  }
+}

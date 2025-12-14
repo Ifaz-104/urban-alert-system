@@ -1,5 +1,6 @@
 // frontend/src/components/Navbar.jsx
 import { useNavigate, useLocation } from 'react-router-dom';
+import NotificationBell from './NotificationBell';
 import './Navbar.css';
 
 export default function Navbar({ user, onLogout }) {
@@ -33,6 +34,7 @@ export default function Navbar({ user, onLogout }) {
               <span className="user-info">
                 {user.username} ({user.points || 0} pts)
               </span>
+              <NotificationBell user={user} />
               <button onClick={handleLogout} className="nav-btn btn-danger">
                 Logout
               </button>
