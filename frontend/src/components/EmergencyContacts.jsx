@@ -25,6 +25,7 @@ function EmergencyContacts({ isOpen, onClose }) {
           ? `${apiURL}/api/emergency-contacts`
           : `${apiURL}/api/emergency-contacts/type/${selectedType}`;
 
+      console.log('🚨 Fetching emergency contacts from:', url);
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -32,10 +33,11 @@ function EmergencyContacts({ isOpen, onClose }) {
       }
 
       const data = await response.json();
+      console.log('✅ Emergency contacts loaded:', data.data.length, 'contacts');
       setContacts(data.data || []);
     } catch (err) {
+      console.error('❌ Error fetching emergency contacts:', err);
       setError(err.message);
-      console.error('Error fetching contacts:', err);
     } finally {
       setLoading(false);
     }
