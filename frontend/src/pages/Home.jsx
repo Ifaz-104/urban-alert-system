@@ -121,7 +121,7 @@ export default function Home({ user }) {
               <div
                 key={report._id}
                 className="report-card"
-                onClick={() => navigate(`/report/${report._id}`)}
+                onClick={() => navigate(`/reports/${report._id}`)}
               >
                 <div className="report-header">
                   <span className="category-icon">{getCategoryIcon(report.category)}</span>

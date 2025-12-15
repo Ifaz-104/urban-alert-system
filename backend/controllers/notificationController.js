@@ -5,7 +5,8 @@ const User = require('../models/User');
 // Get all unread notifications for the current user
 exports.getNotifications = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
+    console.log('📬 Fetching notifications for user:', userId);
 
     const notifications = await Notification.find({ userId })
       .populate('createdByUserId', 'username profilePhoto')
@@ -17,6 +18,8 @@ exports.getNotifications = async (req, res) => {
       userId,
       read: false,
     });
+
+    console.log(`✅ Found ${notifications.length} notifications (${unreadCount} unread) for user:`, userId);
 
     res.status(200).json({
       success: true,
@@ -35,7 +38,7 @@ exports.getNotifications = async (req, res) => {
 // Get unread notification count
 exports.getUnreadCount = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const unreadCount = await Notification.countDocuments({
       userId,
       read: false,
@@ -58,7 +61,7 @@ exports.getUnreadCount = async (req, res) => {
 exports.markAsRead = async (req, res) => {
   try {
     const { notificationId } = req.params;
-    const userId = req.user.id;
+    const userId = req.userId;
 
     const notification = await Notification.findByIdAndUpdate(
       notificationId,
@@ -92,7 +95,7 @@ exports.markAsRead = async (req, res) => {
 // Mark all notifications as read
 exports.markAllAsRead = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
 
     await Notification.updateMany(
       { userId, read: false },
@@ -119,7 +122,7 @@ exports.markAllAsRead = async (req, res) => {
 exports.deleteNotification = async (req, res) => {
   try {
     const { notificationId } = req.params;
-    const userId = req.user.id;
+    const userId = req.userId;
 
     const notification = await Notification.findById(notificationId);
 

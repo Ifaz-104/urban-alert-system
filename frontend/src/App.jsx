@@ -56,7 +56,7 @@ function App() {
         <Route path="/create-report" element={user ? <CreateReport /> : <Navigate to="/login" />} />
 
         {/* Report Details route */}
-        <Route path="/report/:id" element={<ReportDetails />} />
+        <Route path="/reports/:id" element={<ReportDetails />} />
       </Routes>
     </Router>
   );

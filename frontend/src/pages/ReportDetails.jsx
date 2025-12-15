@@ -46,10 +46,11 @@ export default function ReportDetails() {
             setReport(reportData);
 
             // Check if current user has voted
-            if (currentUser.id) {
-                if (reportData.upvotedBy?.includes(currentUser.id)) {
+            const userId = currentUser._id || currentUser.id;
+            if (userId) {
+                if (reportData.upvotedBy?.includes(userId)) {
                     setUserVote('upvote');
-                } else if (reportData.downvotedBy?.includes(currentUser.id)) {
+                } else if (reportData.downvotedBy?.includes(userId)) {
                     setUserVote('downvote');
                 }
             }
@@ -85,7 +86,8 @@ export default function ReportDetails() {
     };
 
     const handleUpvote = async () => {
-        if (!currentUser.id) {
+        const userId = currentUser._id || currentUser.id;
+        if (!userId) {
             alert('Please login to vote');
             navigate('/login');
             return;
@@ -112,7 +114,8 @@ export default function ReportDetails() {
     };
 
     const handleDownvote = async () => {
-        if (!currentUser.id) {
+        const userId = currentUser._id || currentUser.id;
+        if (!userId) {
             alert('Please login to vote');
             navigate('/login');
             return;
@@ -141,7 +144,8 @@ export default function ReportDetails() {
     const handleAddComment = async (e) => {
         e.preventDefault();
 
-        if (!currentUser.id) {
+        const userId = currentUser._id || currentUser.id;
+        if (!userId) {
             alert('Please login to comment');
             navigate('/login');
             return;
@@ -161,7 +165,7 @@ export default function ReportDetails() {
             // Update report with new comment
             setReport(response.data.data);
             setCommentText('');
-            
+
             // Show success message with points
             if (response.data.pointsAwarded) {
                 alert(`Comment added! You earned ${response.data.pointsAwarded} points!`);
@@ -175,8 +179,9 @@ export default function ReportDetails() {
     };
 
     const handleDeleteReport = async () => {
+        const userId = currentUser._id || currentUser.id;
         // Check if user is the report creator
-        if (report.userId._id !== currentUser.id) {
+        if (report.userId._id !== userId) {
             alert('You can only delete your own reports');
             return;
         }
@@ -189,7 +194,7 @@ export default function ReportDetails() {
         try {
             setDeleteLoading(true);
             await reportAPI.deleteReport(id);
-            
+
             // Show success message and redirect
             alert('Report deleted successfully');
             navigate('/');
@@ -229,7 +234,7 @@ export default function ReportDetails() {
                     <button onClick={() => navigate('/')} className="back-button">
                         ← Back to Reports
                     </button>
-                    {currentUser.id === report.userId._id && (
+                    {(currentUser._id || currentUser.id) === report.userId._id && (
                         <button
                             onClick={handleDeleteReport}
                             disabled={deleteLoading}
@@ -359,7 +364,7 @@ export default function ReportDetails() {
                         <h3>💬 Comments ({report.comments.length})</h3>
 
                         {/* Comment Form */}
-                        {currentUser.id ? (
+                        {(currentUser._id || currentUser.id) ? (
                             <form onSubmit={handleAddComment} className="comment-form">
                                 <textarea
                                     value={commentText}

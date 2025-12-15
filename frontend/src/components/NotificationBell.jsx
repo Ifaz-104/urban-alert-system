@@ -19,17 +19,30 @@ function NotificationBell({ user }) {
     if (!user || !token) return;
 
     // Connect to server
-    socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    console.log('🔌 Connecting to Socket.io server:', apiUrl);
+    socketRef.current = io(apiUrl, {
       auth: {
         token,
       },
     });
 
+    socketRef.current.on('connect', () => {
+      console.log('✅ Socket.io connected:', socketRef.current.id);
+    });
+
+    socketRef.current.on('connect_error', (error) => {
+      console.error('❌ Socket.io connection error:', error);
+    });
+
     // Join user-specific room for notifications
-    socketRef.current.emit('join_user_room', user.id);
+    const userId = user._id || user.id;
+    console.log('👤 User ID:', userId, '| Joining notification room...');
+    socketRef.current.emit('join_user_room', userId);
 
     // Listen for new alerts
     socketRef.current.on('new_alert', (alert) => {
+      console.log('🚨 New alert received:', alert);
       // Add new notification to the top of the list
       const newNotification = {
         _id: alert.id,
@@ -61,7 +74,7 @@ function NotificationBell({ user }) {
 
     return () => {
       if (socketRef.current) {
-        socketRef.current.emit('leave_user_room', user.id);
+        socketRef.current.emit('leave_user_room', userId);
         socketRef.current.disconnect();
       }
     };
@@ -87,6 +100,7 @@ function NotificationBell({ user }) {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
+      console.log('📡 Fetching notifications from API...');
       const response = await fetch(
         `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications`,
         {
@@ -98,8 +112,11 @@ function NotificationBell({ user }) {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ Notifications fetched:', data.data.length, 'total,', data.unreadCount, 'unread');
         setNotifications(data.data || []);
         setUnreadCount(data.unreadCount || 0);
+      } else {
+        console.error('❌ Failed to fetch notifications:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -184,10 +201,24 @@ function NotificationBell({ user }) {
 
   // Handle notification click
   const handleNotificationClick = (notification) => {
+    console.log('🔔 Notification clicked:', notification);
+
+    // Mark as read if unread
     if (!notification.read) {
       markAsRead(notification._id);
     }
-    navigate(`/reports/${notification.reportId}`);
+
+    // Extract report ID (might be object or string)
+    const reportId = notification.reportId?._id || notification.reportId;
+
+    if (!reportId) {
+      console.error('❌ No reportId found in notification:', notification);
+      alert('Cannot navigate to report - missing report ID');
+      return;
+    }
+
+    console.log('➡️ Navigating to report:', reportId);
+    navigate(`/reports/${reportId}`);
     setShowDropdown(false);
   };
 
