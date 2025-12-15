@@ -30,9 +30,26 @@ export const reportAPI = {
   getSingleReport: (id) => api.get(`/reports/${id}`),
   getReportById: (id) => api.get(`/reports/${id}`),
   updateReport: (id, data) => api.put(`/reports/${id}`, data),
+  deleteReport: (id) => api.delete(`/reports/${id}`),
   addComment: (id, data) => api.post(`/reports/${id}/comments`, data),
   upvoteReport: (id) => api.post(`/reports/${id}/upvote`),
   downvoteReport: (id) => api.post(`/reports/${id}/downvote`),
+};
+
+// Upload API calls
+export const uploadAPI = {
+  uploadFiles: (files) => {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+    return api.post('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  deleteFile: (filename) => api.delete(`/upload/${filename}`),
 };
 
 export default api;

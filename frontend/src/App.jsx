@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import EmergencySOS from './components/EmergencySOS';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -40,6 +41,7 @@ function App() {
   return (
     <Router>
       <Navbar user={user} onLogout={handleLogout} />
+      <EmergencySOS />
       <Routes>
         {/* Redirect root to login if not authenticated, else go to Home */}
         <Route path="/" element={user ? <Home user={user} /> : <Navigate to="/login" />} />

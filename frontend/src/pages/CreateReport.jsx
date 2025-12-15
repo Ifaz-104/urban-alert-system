@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { reportAPI } from '../services/api';
+import { reportAPI, uploadAPI } from '../services/api';
 import MapLocationPicker from '../components/MapLocationPicker';
 import './CreateReport.css';
 
@@ -20,9 +20,13 @@ export default function CreateReport() {
     longitude: null,
   });
 
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [filePreviews, setFilePreviews] = useState([]);
+  const [uploadedMediaUrls, setUploadedMediaUrls] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const categories = ['accident', 'fire', 'flood', 'crime', 'pollution', 'earthquake', 'cyclone', 'other'];
   const severities = ['low', 'medium', 'high', 'critical'];
@@ -35,7 +39,79 @@ export default function CreateReport() {
     }));
   };
 
-  // ✨ Handle location selection from map picker
+  // Handle file selection
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    const maxFiles = 5;
+
+    if (files.length + selectedFiles.length > maxFiles) {
+      setError(`Maximum ${maxFiles} files allowed`);
+      return;
+    }
+
+    setSelectedFiles((prev) => [...prev, ...files]);
+
+    // Create previews
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setFilePreviews((prev) => [
+          ...prev,
+          {
+            name: file.name,
+            type: file.type,
+            url: event.target.result,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Clear input
+    e.target.value = '';
+  };
+
+  // Remove selected file
+  const removeSelectedFile = (index) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setFilePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Remove uploaded file
+  const removeUploadedFile = (index) => {
+    setUploadedMediaUrls((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Upload files to server
+  const handleUploadFiles = async () => {
+    if (selectedFiles.length === 0) {
+      setError('No files selected');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      setUploadProgress(0);
+      const response = await uploadAPI.uploadFiles(selectedFiles);
+
+      if (response.data.success) {
+        const newMediaUrls = response.data.data.files;
+        setUploadedMediaUrls((prev) => [...prev, ...newMediaUrls]);
+        setSelectedFiles([]);
+        setFilePreviews([]);
+        setUploadProgress(100);
+        setTimeout(() => setUploadProgress(0), 2000);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'File upload failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle location selection from map picker
   const handleLocationSelect = (location) => {
     if (location) {
       setFormData((prev) => ({
@@ -69,7 +145,7 @@ export default function CreateReport() {
         return;
       }
 
-      // Create report with location data
+      // Create report with location data and media
       const response = await reportAPI.createReport({
         title: formData.title,
         description: formData.description,
@@ -79,6 +155,7 @@ export default function CreateReport() {
         city: formData.city,
         latitude: formData.latitude,
         longitude: formData.longitude,
+        mediaUrls: uploadedMediaUrls,
       });
 
       setSuccess(
@@ -169,7 +246,7 @@ export default function CreateReport() {
             </div>
           </div>
 
-          {/* ADDRESS & CITY FIELDS - Now before the map */}
+          {/* ADDRESS & CITY FIELDS */}
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="address">Address (Optional)</label>
@@ -196,7 +273,7 @@ export default function CreateReport() {
             </div>
           </div>
 
-          {/* ✨ MAP LOCATION PICKER */}
+          {/* MAP LOCATION PICKER */}
           <div className="form-group">
             <label>📍 Select Incident Location on Map</label>
             <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-12)' }}>
@@ -215,7 +292,7 @@ export default function CreateReport() {
             />
           </div>
 
-          {/* COORDINATES DISPLAY (Read-only) */}
+          {/* COORDINATES DISPLAY */}
           {formData.latitude && formData.longitude && (
             <div className="coordinates-display">
               <p>
@@ -229,6 +306,111 @@ export default function CreateReport() {
               </p>
             </div>
           )}
+
+          {/* FILE UPLOAD SECTION */}
+          <div className="form-group">
+            <label>📸 Photo & Video Upload (Optional)</label>
+            <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-12)' }}>
+              Upload up to 5 photos or videos to support your report. Accepted formats: JPG, PNG, GIF, WebP, MP4, MPEG, MOV, AVI (Max 50MB each)
+            </p>
+
+            {/* FILE INPUT */}
+            <div className="file-input-wrapper">
+              <input
+                type="file"
+                id="file-input"
+                multiple
+                accept="image/*,video/*"
+                onChange={handleFileSelect}
+                disabled={loading || selectedFiles.length + uploadedMediaUrls.length >= 5}
+                style={{ display: 'none' }}
+              />
+              <label htmlFor="file-input" className="file-input-label">
+                {loading ? 'Uploading...' : '+ Choose Files'}
+              </label>
+            </div>
+
+            {/* SELECTED FILES PREVIEW */}
+            {filePreviews.length > 0 && (
+              <div className="file-preview-container">
+                <h4>Selected Files ({selectedFiles.length}):</h4>
+                <div className="file-preview-grid">
+                  {filePreviews.map((preview, index) => (
+                    <div key={index} className="file-preview-item">
+                      {preview.type.startsWith('image/') ? (
+                        <img src={preview.url} alt={preview.name} />
+                      ) : (
+                        <div className="video-placeholder">
+                          <span>🎥</span>
+                          <p>{preview.name}</p>
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        className="remove-btn"
+                        onClick={() => removeSelectedFile(index)}
+                        title="Remove"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* UPLOAD BUTTON */}
+                <button
+                  type="button"
+                  className="btn-upload-files"
+                  onClick={handleUploadFiles}
+                  disabled={loading || selectedFiles.length === 0}
+                >
+                  {loading ? 'Uploading...' : `Upload ${selectedFiles.length} File(s)`}
+                </button>
+
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: `${uploadProgress}%` }}></div>
+                  </div>
+                )}
+
+                {uploadProgress === 100 && (
+                  <div className="upload-success">✓ Files uploaded successfully</div>
+                )}
+              </div>
+            )}
+
+            {/* UPLOADED MEDIA DISPLAY */}
+            {uploadedMediaUrls.length > 0 && (
+              <div className="uploaded-media-container">
+                <h4>Uploaded Media ({uploadedMediaUrls.length}):</h4>
+                <div className="uploaded-media-grid">
+                  {uploadedMediaUrls.map((url, index) => {
+                    const isVideo = url.includes('.mp4') || url.includes('.mpeg') || url.includes('.mov') || url.includes('.avi');
+                    return (
+                      <div key={index} className="uploaded-media-item">
+                        {isVideo ? (
+                          <div className="video-placeholder">
+                            <span>🎥</span>
+                            <p>{url.split('/').pop()}</p>
+                          </div>
+                        ) : (
+                          <img src={url} alt={`Uploaded ${index}`} />
+                        )}
+                        <button
+                          type="button"
+                          className="remove-btn"
+                          onClick={() => removeUploadedFile(index)}
+                          title="Remove"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* SUBMIT BUTTON */}
           <button

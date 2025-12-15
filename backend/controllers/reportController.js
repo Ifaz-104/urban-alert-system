@@ -5,6 +5,7 @@
 
 const IncidentReport = require('../models/IncidentReport');
 const User = require('../models/User');
+const { broadcastHazardAlert } = require('./notificationController');
 
 // @desc    Create incident report
 // @route   POST /api/reports
@@ -19,7 +20,8 @@ exports.createReport = async (req, res) => {
       address,
       city,
       latitude,
-      longitude
+      longitude,
+      mediaUrls = [],
     } = req.body;
 
     // ✅ VALIDATION - only title, description, category required
@@ -50,6 +52,7 @@ exports.createReport = async (req, res) => {
       latitude: latitude || null,
       longitude: longitude || null,
       location: locationObject, // GeoJSON location
+      mediaUrls: Array.isArray(mediaUrls) ? mediaUrls : [],
       userId: req.userId,
       status: 'pending',
       isVerified: false,
@@ -62,6 +65,12 @@ exports.createReport = async (req, res) => {
 
     // Populate user info before returning
     await report.populate('userId', 'username email');
+
+    // 🚨 Broadcast hazard alert to all users via Socket.io and create notifications
+    const io = req.io;
+    if (io) {
+      await broadcastHazardAlert(io, report, user);
+    }
 
     res.status(201).json({
       success: true,

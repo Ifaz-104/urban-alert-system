@@ -27,6 +27,9 @@ export default function ReportDetails() {
     const [error, setError] = useState('');
     const [userVote, setUserVote] = useState(null); // 'upvote', 'downvote', or null
     const [votingLoading, setVotingLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [commentText, setCommentText] = useState('');
+    const [commentLoading, setCommentLoading] = useState(false);
 
     // Get current user from sessionStorage
     const currentUser = JSON.parse(sessionStorage.getItem('user') || '{}');
@@ -135,6 +138,69 @@ export default function ReportDetails() {
         }
     };
 
+    const handleAddComment = async (e) => {
+        e.preventDefault();
+
+        if (!currentUser.id) {
+            alert('Please login to comment');
+            navigate('/login');
+            return;
+        }
+
+        if (!commentText.trim()) {
+            alert('Please enter a comment');
+            return;
+        }
+
+        try {
+            setCommentLoading(true);
+            const response = await reportAPI.addComment(id, {
+                content: commentText.trim()
+            });
+
+            // Update report with new comment
+            setReport(response.data.data);
+            setCommentText('');
+            
+            // Show success message with points
+            if (response.data.pointsAwarded) {
+                alert(`Comment added! You earned ${response.data.pointsAwarded} points!`);
+            }
+        } catch (err) {
+            console.error('Error adding comment:', err);
+            alert(err.response?.data?.message || 'Failed to add comment');
+        } finally {
+            setCommentLoading(false);
+        }
+    };
+
+    const handleDeleteReport = async () => {
+        // Check if user is the report creator
+        if (report.userId._id !== currentUser.id) {
+            alert('You can only delete your own reports');
+            return;
+        }
+
+        // Confirm deletion
+        if (!window.confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            setDeleteLoading(true);
+            await reportAPI.deleteReport(id);
+            
+            // Show success message and redirect
+            alert('Report deleted successfully');
+            navigate('/');
+        } catch (err) {
+            console.error('Error deleting report:', err);
+            alert(err.response?.data?.message || 'Failed to delete report');
+        } finally {
+            setDeleteLoading(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="report-details-container">
@@ -146,10 +212,12 @@ export default function ReportDetails() {
     if (error || !report) {
         return (
             <div className="report-details-container">
+                <div className="report-details-header">
+                    <button onClick={() => navigate('/')} className="back-button">
+                        ← Back to Reports
+                    </button>
+                </div>
                 <div className="error-message">{error || 'Report not found'}</div>
-                <button onClick={() => navigate('/')} className="btn btn--primary">
-                    Back to Home
-                </button>
             </div>
         );
     }
@@ -157,9 +225,21 @@ export default function ReportDetails() {
     return (
         <div className="report-details-container">
             <div className="report-details-header">
-                <button onClick={() => navigate('/')} className="back-button">
-                    ← Back to Reports
-                </button>
+                <div className="header-buttons">
+                    <button onClick={() => navigate('/')} className="back-button">
+                        ← Back to Reports
+                    </button>
+                    {currentUser.id === report.userId._id && (
+                        <button
+                            onClick={handleDeleteReport}
+                            disabled={deleteLoading}
+                            className="delete-button"
+                            title="Delete this report"
+                        >
+                            {deleteLoading ? '🗑️ Deleting...' : '🗑️ Delete Report'}
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="report-details-content">
@@ -208,6 +288,35 @@ export default function ReportDetails() {
                         <p>{report.description}</p>
                     </div>
 
+                    {/* Media Gallery Section */}
+                    {report.mediaUrls && report.mediaUrls.length > 0 && (
+                        <div className="media-gallery-section">
+                            <h3>📸 Media Attachments ({report.mediaUrls.length})</h3>
+                            <div className="media-gallery-grid">
+                                {report.mediaUrls.map((url, index) => {
+                                    const isVideo = url.includes('.mp4') || url.includes('.mpeg') || url.includes('.mov') || url.includes('.avi');
+                                    return (
+                                        <div key={index} className="media-gallery-item">
+                                            {isVideo ? (
+                                                <video
+                                                    controls
+                                                    width="100%"
+                                                    height="auto"
+                                                    style={{ borderRadius: '6px' }}
+                                                >
+                                                    <source src={`http://localhost:5000${url}`} type="video/mp4" />
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            ) : (
+                                                <img src={`http://localhost:5000${url}`} alt={`Report media ${index}`} />
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Voting Section */}
                     <div className="voting-section">
                         <h3>Community Feedback</h3>
@@ -242,6 +351,65 @@ export default function ReportDetails() {
                         <div className="stat-item">
                             <span className="stat-value">{report.status}</span>
                             <span className="stat-label">Status</span>
+                        </div>
+                    </div>
+
+                    {/* Comments Section */}
+                    <div className="comments-section">
+                        <h3>💬 Comments ({report.comments.length})</h3>
+
+                        {/* Comment Form */}
+                        {currentUser.id ? (
+                            <form onSubmit={handleAddComment} className="comment-form">
+                                <textarea
+                                    value={commentText}
+                                    onChange={(e) => setCommentText(e.target.value)}
+                                    placeholder="Share your thoughts or updates about this report..."
+                                    rows="3"
+                                    maxLength={500}
+                                    className="comment-input"
+                                />
+                                <div className="comment-form-footer">
+                                    <span className="char-count">
+                                        {commentText.length}/500
+                                    </span>
+                                    <button
+                                        type="submit"
+                                        disabled={commentLoading || !commentText.trim()}
+                                        className="btn-comment-submit"
+                                    >
+                                        {commentLoading ? '📤 Posting...' : '📤 Post Comment'}
+                                    </button>
+                                </div>
+                            </form>
+                        ) : (
+                            <div className="comment-login-prompt">
+                                <p>👋 Please <button onClick={() => navigate('/login')} className="link-button">log in</button> to comment</p>
+                            </div>
+                        )}
+
+                        {/* Comments Display */}
+                        <div className="comments-list">
+                            {report.comments && report.comments.length > 0 ? (
+                                report.comments.map((comment, index) => (
+                                    <div key={index} className="comment-item">
+                                        <div className="comment-header">
+                                            <span className="comment-author">👤 {comment.userId?.username || 'Anonymous'}</span>
+                                            <span className="comment-date">
+                                                {new Date(comment.createdAt).toLocaleDateString()} {new Date(comment.createdAt).toLocaleTimeString([], {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </span>
+                                        </div>
+                                        <p className="comment-content">{comment.content}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="no-comments">
+                                    <p>No comments yet. Be the first to comment! 💭</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
