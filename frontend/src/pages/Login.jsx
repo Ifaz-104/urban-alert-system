@@ -30,7 +30,12 @@ export default function Login() {
       const response = await authAPI.login(formData);
       sessionStorage.setItem('token', response.data.token);
       sessionStorage.setItem('user', JSON.stringify(response.data.user));
-      navigate('/');
+      // Redirect admins to admin panel, regular users to home
+      if (response.data.user && response.data.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
       window.location.reload(); // Reload to update App state
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');

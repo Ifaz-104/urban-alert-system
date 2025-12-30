@@ -34,15 +34,16 @@ const userSchema = new mongoose.Schema(
       maxlength: 500,
     },
     // Location for radius-based alerts (optional)
+    // Only set when coordinates are provided. Do NOT default `type` to 'Point'
+    // because that creates an invalid GeoJSON Point without `coordinates`.
     location: {
       type: {
         type: String,
         enum: ['Point'],
-        default: 'Point'
+        default: undefined
       },
       coordinates: {
         type: [Number], // [longitude, latitude]
-        sparse: true
       }
     },
     latitude: {

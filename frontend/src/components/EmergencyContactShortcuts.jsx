@@ -23,6 +23,21 @@ function EmergencyContactShortcuts({ user }) {
       const response = await emergencyContactsAPI.getAllContacts({ country });
       const allContacts = response.data.data || [];
 
+      // If user is logged in, fetch their custom contacts from protected endpoint
+      let customContacts = [];
+      if (user) {
+        try {
+          const customResp = await emergencyContactsAPI.getCustomContacts();
+          customContacts = customResp.data.data || [];
+        } catch (err) {
+          // If fetching custom contacts fails, fall back to filtering allContacts
+          console.warn('Failed to fetch protected custom contacts, falling back:', err);
+          customContacts = allContacts.filter(c => c.userId && c.type === 'custom');
+        }
+      } else {
+        customContacts = allContacts.filter(c => c.userId && c.type === 'custom');
+      }
+
       // Get the primary contact for each service type
       const primaryContacts = {
         police: allContacts.find(c => c.type === 'police' && !c.userId) || null,
@@ -30,9 +45,6 @@ function EmergencyContactShortcuts({ user }) {
         fire: allContacts.find(c => c.type === 'fire' && !c.userId) || null,
         disaster: allContacts.find(c => c.type === 'disaster' && !c.userId) || null,
       };
-
-      // Get custom contacts (family/friends)
-      const customContacts = allContacts.filter(c => c.userId && c.type === 'custom');
 
       setContacts({
         primary: primaryContacts,
