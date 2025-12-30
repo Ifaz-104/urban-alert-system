@@ -1,5 +1,6 @@
 // backend/middleware/auth.js
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
 const protect = async (req, res, next) => {
   let token;
@@ -14,7 +15,12 @@ const protect = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'User not found' });
+    }
     req.userId = decoded.id;
+    req.user = user; // Populate user object for role checks
     next();
   } catch (error) {
     return res.status(401).json({ success: false, message: 'Not authorized to access this route' });
@@ -23,14 +29,39 @@ const protect = async (req, res, next) => {
 
 const authorize = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.userRole)) {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Not authorized - user not found',
+      });
+    }
+    
+    if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: `User role '${req.userRole}' is not authorized to access this route`,
+        message: `User role '${req.user.role}' is not authorized to access this route`,
       });
     }
     next();
   };
 };
 
-module.exports = { protect, authorize };
+// Admin-only middleware (convenience wrapper)
+const adminOnly = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: 'Not authorized - user not found',
+    });
+  }
+  
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: 'Admin access required',
+    });
+  }
+  next();
+};
+
+module.exports = { protect, authorize, adminOnly };

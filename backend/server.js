@@ -41,6 +41,8 @@ app.use('/api/reports', require('./routes/reportRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/emergency-contacts', require('./routes/emergencyContactRoutes'));
+app.use('/api/user/preferences', require('./routes/userPreferencesRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 // Socket.io event handlers
 io.on('connection', (socket) => {

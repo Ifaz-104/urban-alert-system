@@ -52,4 +52,32 @@ export const uploadAPI = {
   deleteFile: (filename) => api.delete(`/upload/${filename}`),
 };
 
+// Emergency Contacts API calls
+export const emergencyContactsAPI = {
+  getAllContacts: (params) => api.get('/emergency-contacts', { params }),
+  getContactsByType: (type, params) => api.get(`/emergency-contacts/type/${type}`, { params }),
+  getContactTypes: () => api.get('/emergency-contacts/types'),
+  getContact: (id) => api.get(`/emergency-contacts/${id}`),
+  // Custom contacts
+  getCustomContacts: () => api.get('/emergency-contacts/custom/list'),
+  createCustomContact: (data) => api.post('/emergency-contacts/custom', data),
+  updateCustomContact: (id, data) => api.put(`/emergency-contacts/custom/${id}`, data),
+  deleteCustomContact: (id) => api.delete(`/emergency-contacts/custom/${id}`),
+};
+
+// User Preferences API calls
+export const userPreferencesAPI = {
+  getPreferences: () => api.get('/user/preferences'),
+  updatePreferences: (data) => api.put('/user/preferences', { notificationSettings: data }),
+};
+
+// Admin API calls
+export const adminAPI = {
+  getDashboardStats: () => api.get('/admin/stats'),
+  getAllReports: (params) => api.get('/admin/reports', { params }),
+  verifyReport: (id) => api.put(`/admin/reports/${id}/verify`),
+  rejectReport: (id, reason) => api.put(`/admin/reports/${id}/reject`, { reason }),
+  sendMassAlert: (data) => api.post('/admin/alerts', data),
+};
+
 export default api;

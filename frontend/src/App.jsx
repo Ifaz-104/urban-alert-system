@@ -8,6 +8,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import CreateReport from './pages/CreateReport';
 import ReportDetails from './pages/ReportDetails';
+import Settings from './pages/Settings';
+import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 
 function App() {
@@ -54,6 +56,21 @@ function App() {
 
         {/* Protected Create Report route */}
         <Route path="/create-report" element={user ? <CreateReport /> : <Navigate to="/login" />} />
+
+        {/* Protected Settings route */}
+        <Route path="/settings" element={user ? <Settings user={user} /> : <Navigate to="/login" />} />
+
+        {/* Protected Admin Dashboard route */}
+        <Route
+          path="/admin"
+          element={
+            user && user.role === 'admin' ? (
+              <AdminDashboard user={user} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
 
         {/* Report Details route */}
         <Route path="/reports/:id" element={<ReportDetails />} />

@@ -61,6 +61,13 @@ const emergencyContactSchema = new mongoose.Schema(
       default: 'Global',
     },
 
+    // User ID for custom contacts (family, friends)
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null, // null means it's a system-wide contact
+    },
+
     // Contact hours (optional)
     available24x7: {
       type: Boolean,
@@ -83,5 +90,6 @@ const emergencyContactSchema = new mongoose.Schema(
 // Index for efficient queries
 emergencyContactSchema.index({ type: 1, isActive: 1, priority: 1 });
 emergencyContactSchema.index({ city: 1, country: 1 });
+emergencyContactSchema.index({ userId: 1, type: 1 }); // For user-specific custom contacts
 
 module.exports = mongoose.model('EmergencyContact', emergencyContactSchema);

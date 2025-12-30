@@ -85,6 +85,12 @@ const incidentReportSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    verifiedAt: {
+      type: Date,
+    },
+    rejectionReason: {
+      type: String,
+    },
 
     // Media
     mediaUrls: [String],
@@ -143,5 +149,7 @@ incidentReportSchema.index({ location: '2dsphere' });
 incidentReportSchema.index({ latitude: 1, longitude: 1 });
 incidentReportSchema.index({ userId: 1 });
 incidentReportSchema.index({ createdAt: -1 });
+incidentReportSchema.index({ status: 1 });
+incidentReportSchema.index({ status: 1, createdAt: -1 }); // Compound index for admin queries
 
 module.exports = mongoose.model('IncidentReport', incidentReportSchema);

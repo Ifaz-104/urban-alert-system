@@ -1,0 +1,337 @@
+/* frontend/src/components/EmergencyContactShortcuts.css */
+
+.emergency-shortcuts-container {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 24px 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.emergency-shortcuts-header {
+  text-align: center;
+  margin-bottom: 24px;
+  color: white;
+}
+
+.emergency-shortcuts-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+}
+
+.emergency-shortcuts-header .subtitle {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+  color: white;
+}
+
+.emergency-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.emergency-button {
+  background: white;
+  border: none;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.emergency-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--button-color);
+}
+
+.emergency-button:hover:not(:disabled) {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.emergency-button:active:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.emergency-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button-icon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.button-content {
+  text-align: center;
+  width: 100%;
+}
+
+.button-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 4px;
+}
+
+.button-number {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--button-color);
+  word-break: break-all;
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p,
+.error-state p {
+  color: white;
+  font-size: 16px;
+  margin: 0;
+}
+
+.retry-btn {
+  padding: 10px 20px;
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: #f5f5f5;
+  transform: translateY(-2px);
+}
+
+/* Custom Contacts Section */
+.custom-contacts-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.custom-contacts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.custom-contacts-header h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #2c3e50;
+}
+
+.add-contact-btn {
+  padding: 8px 16px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.add-contact-btn:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+}
+
+.custom-contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.custom-contact-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  transition: all 0.2s ease;
+}
+
+.custom-contact-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.custom-contact-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.custom-contact-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.custom-contact-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.custom-contact-number {
+  font-size: 12px;
+  color: #6c757d;
+  word-break: break-all;
+}
+
+.custom-contact-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.call-custom-btn,
+.delete-custom-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.call-custom-btn:hover {
+  background: #e3f2fd;
+}
+
+.delete-custom-btn:hover {
+  background: #ffebee;
+}
+
+.no-custom-contacts {
+  text-align: center;
+  padding: 24px;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.login-prompt {
+  text-align: center;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.login-prompt p {
+  margin: 0;
+  color: white;
+  font-size: 14px;
+}
+
+.login-prompt a {
+  color: white;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .emergency-shortcuts-container {
+    padding: 16px;
+    margin: 16px 0;
+  }
+
+  .emergency-shortcuts-header h2 {
+    font-size: 24px;
+  }
+
+  .emergency-buttons-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .emergency-button {
+    padding: 16px;
+  }
+
+  .button-icon {
+    font-size: 40px;
+  }
+
+  .button-label {
+    font-size: 16px;
+  }
+
+  .button-number {
+    font-size: 14px;
+  }
+
+  .custom-contacts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .custom-contacts-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .add-contact-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .emergency-buttons-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
