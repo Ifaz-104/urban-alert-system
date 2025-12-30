@@ -80,4 +80,23 @@ export const adminAPI = {
   sendMassAlert: (data) => api.post('/admin/alerts', data),
 };
 
+// Leaderboard API calls
+export const leaderboardAPI = {
+  getLeaderboard: (params) => api.get('/leaderboard', { params }),
+};
+
+// Points API calls
+export const pointsAPI = {
+  getUserPoints: (id) => api.get(`/points/user/${id}`),
+  awardPoints: (data) => api.post('/points/award', data),
+};
+
+// User Profile & Stats API calls
+export const userAPI = {
+  getProfile: (id) => api.get(`/user/${id}/profile`),
+  getReports: (id) => api.get(`/user/${id}/reports`),
+  updateProfile: (id, data) => api.put(`/user/${id}/profile`, data),
+  getActivity: (id) => api.get(`/user/${id}/activity`),
+};
+
 export default api;

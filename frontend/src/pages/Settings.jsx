@@ -1,6 +1,8 @@
 // frontend/src/pages/Settings.jsx
 import { useState, useEffect } from 'react';
-import { userPreferencesAPI } from '../services/api';
+import { userPreferencesAPI, pointsAPI } from '../services/api';
+import BadgeDisplay from '../components/BadgeDisplay';
+import { BADGE_DESCRIPTIONS } from '../components/BadgeDisplay';
 import './Settings.css';
 
 function Settings({ user }) {
@@ -16,6 +18,12 @@ function Settings({ user }) {
     method: 'push',
     enabled: true,
   });
+  const [userStats, setUserStats] = useState({
+    points: 0,
+    badges: [],
+    totalReports: 0,
+    verifiedReports: 0,
+  });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -24,8 +32,21 @@ function Settings({ user }) {
   useEffect(() => {
     if (user) {
       fetchPreferences();
+      fetchUserStats();
     }
   }, [user]);
+
+  const fetchUserStats = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await pointsAPI.getUserPoints(user.id);
+      if (response.data.success) {
+        setUserStats(response.data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching user stats:', err);
+    }
+  };
 
   const fetchPreferences = async () => {
     try {
@@ -122,6 +143,44 @@ function Settings({ user }) {
           ✅ Preferences saved successfully!
         </div>
       )}
+
+      {/* User Profile Section */}
+      <div className="profile-section">
+        <div className="profile-card">
+          <div className="profile-header">
+            <h2>👤 Your Profile</h2>
+          </div>
+          <div className="profile-stats">
+            <div className="stat-item">
+              <div className="stat-value">{userStats.points || 0}</div>
+              <div className="stat-label">Total Points</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">{userStats.totalReports || 0}</div>
+              <div className="stat-label">Reports Submitted</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">{userStats.verifiedReports || 0}</div>
+              <div className="stat-label">Verified Reports</div>
+            </div>
+          </div>
+          <div className="badges-section-profile">
+            <h3>🏅 Your Badges</h3>
+            {userStats.badges && userStats.badges.length > 0 ? (
+              <div className="badges-list">
+                {userStats.badges.map((badge, index) => (
+                  <div key={index} className="badge-card">
+                    <BadgeDisplay badges={[badge]} size="large" showDescription={true} />
+                    <p className="badge-description">{BADGE_DESCRIPTIONS[badge] || ''}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="no-badges-text">No badges earned yet. Keep contributing to earn badges!</p>
+            )}
+          </div>
+        </div>
+      </div>
 
       <div className="settings-content">
         {/* Master Toggle */}

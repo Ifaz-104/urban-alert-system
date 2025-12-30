@@ -53,6 +53,8 @@ exports.register = async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
+        points: user.points || 0,
+        badges: user.badges || [],
       },
     });
   } catch (error) {
@@ -110,7 +112,8 @@ exports.login = async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
-        points: user.points,
+        points: user.points || 0,
+        badges: user.badges || [],
       },
     });
   } catch (error) {
@@ -127,11 +130,23 @@ exports.login = async (req, res) => {
 // @access  Private
 exports.getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.userId).select('-password');
 
     res.status(200).json({
       success: true,
-      user,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        points: user.points || 0,
+        badges: user.badges || [],
+        totalReports: user.totalReports || 0,
+        phone: user.phone,
+        address: user.address,
+        profilePhoto: user.profilePhoto,
+        notificationSettings: user.notificationSettings,
+      },
     });
   } catch (error) {
     res.status(500).json({

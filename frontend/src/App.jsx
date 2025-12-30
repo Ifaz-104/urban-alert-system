@@ -10,6 +10,8 @@ import CreateReport from './pages/CreateReport';
 import ReportDetails from './pages/ReportDetails';
 import Settings from './pages/Settings';
 import AdminDashboard from './pages/AdminDashboard';
+import Leaderboard from './pages/Leaderboard';
+import Profile from './pages/Profile';
 import './App.css';
 
 function App() {
@@ -59,6 +61,12 @@ function App() {
 
         {/* Protected Settings route */}
         <Route path="/settings" element={user ? <Settings user={user} /> : <Navigate to="/login" />} />
+
+        {/* Protected Profile route */}
+        <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/login" />} />
+
+        {/* Leaderboard route */}
+        <Route path="/leaderboard" element={<Leaderboard />} />
 
         {/* Protected Admin Dashboard route */}
         <Route

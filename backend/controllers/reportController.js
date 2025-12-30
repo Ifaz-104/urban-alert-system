@@ -6,6 +6,8 @@
 const IncidentReport = require('../models/IncidentReport');
 const User = require('../models/User');
 const { broadcastHazardAlert } = require('./notificationController');
+const { awardPointsHelper, POINTS } = require('./pointsController');
+const ActivityLog = require('../models/ActivityLog');
 
 // @desc    Create incident report
 // @route   POST /api/reports
@@ -58,10 +60,21 @@ exports.createReport = async (req, res) => {
       isVerified: false,
     });
 
-    // Award points to user
+    // Update user's total reports count
     const user = await User.findById(req.userId);
-    user.points += 10; // 10 points for creating a report
+    user.totalReports = (user.totalReports || 0) + 1;
     await user.save();
+
+    // Log activity
+    await ActivityLog.create({
+      userId: req.userId,
+      action: 'create_report',
+      details: `Created report: ${title}`,
+      relatedReportId: report._id,
+    });
+
+    // Note: Points will be awarded when report is verified by admin
+    // Points are not awarded immediately on report creation
 
     // Populate user info before returning
     await report.populate('userId', 'username email');
@@ -76,7 +89,6 @@ exports.createReport = async (req, res) => {
       success: true,
       message: 'Report created successfully',
       data: report,
-      pointsAwarded: 10,
     });
   } catch (error) {
     console.error(error);
@@ -306,21 +318,42 @@ exports.addComment = async (req, res) => {
 
     await report.save();
 
-    // Award points for commenting
-    const user = await User.findById(req.userId);
-    if (user) {
-      user.points = (user.points || 0) + 2;
-      await user.save();
-    }
-
-    await report.populate('comments.userId', 'username email firstName lastName');
-
-    res.status(201).json({
-      success: true,
-      message: 'Comment added successfully',
-      data: report,
-      pointsAwarded: 2,
+    // Log activity for comment
+    await ActivityLog.create({
+      userId: req.userId,
+      action: 'comment',
+      details: `Commented on report: ${report.title}`,
+      relatedReportId: report._id,
     });
+
+    // Award points for commenting (5 points)
+    try {
+      const result = await awardPointsHelper(
+        req.userId,
+        POINTS.COMMENT,
+        'comment',
+        `Added comment to report: ${report.title}`,
+        report._id
+      );
+
+      await report.populate('comments.userId', 'username email firstName lastName');
+
+      res.status(201).json({
+        success: true,
+        message: 'Comment added successfully',
+        data: report,
+        pointsAwarded: POINTS.COMMENT,
+        newBadges: result.newBadges,
+      });
+    } catch (error) {
+      // If points awarding fails, still return success for comment
+      await report.populate('comments.userId', 'username email firstName lastName');
+      res.status(201).json({
+        success: true,
+        message: 'Comment added successfully',
+        data: report,
+      });
+    }
 
   } catch (error) {
     console.error('Error in addComment:', error);
@@ -420,6 +453,28 @@ exports.upvoteReport = async (req, res) => {
       // Add upvote
       report.upvotedBy.push(userId);
       report.upvotes += 1;
+
+      // Log activity for vote
+      await ActivityLog.create({
+        userId,
+        action: 'vote',
+        details: `Upvoted report: ${report.title}`,
+        relatedReportId: report._id,
+      });
+
+      // Award points for voting (only if adding vote, not removing)
+      try {
+        await awardPointsHelper(
+          userId,
+          POINTS.VOTE,
+          'vote',
+          `Upvoted report: ${report.title}`,
+          report._id
+        );
+      } catch (error) {
+        console.error('Error awarding points for vote:', error);
+        // Continue even if points awarding fails
+      }
     }
 
     await report.save();
@@ -477,6 +532,28 @@ exports.downvoteReport = async (req, res) => {
       // Add downvote
       report.downvotedBy.push(userId);
       report.downvotes += 1;
+
+      // Log activity for vote
+      await ActivityLog.create({
+        userId,
+        action: 'vote',
+        details: `Downvoted report: ${report.title}`,
+        relatedReportId: report._id,
+      });
+
+      // Award points for voting (only if adding vote, not removing)
+      try {
+        await awardPointsHelper(
+          userId,
+          POINTS.VOTE,
+          'vote',
+          `Downvoted report: ${report.title}`,
+          report._id
+        );
+      } catch (error) {
+        console.error('Error awarding points for vote:', error);
+        // Continue even if points awarding fails
+      }
     }
 
     await report.save();

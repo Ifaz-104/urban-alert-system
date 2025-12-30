@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema(
     },
     phone: String,
     address: String,
+    bio: {
+      type: String,
+      default: '',
+      maxlength: 500,
+    },
     // Location for radius-based alerts (optional)
     location: {
       type: {
@@ -57,7 +62,18 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    profilePhoto: String,
+    badges: {
+      type: [String],
+      default: [],
+    },
+    totalReports: {
+      type: Number,
+      default: 0,
+    },
+    profilePhoto: {
+      type: String,
+      default: '',
+    },
     // Notification preferences
     notificationSettings: {
       // Category preferences (enable/disable notifications for each category)
@@ -105,7 +121,7 @@ const userSchema = new mongoose.Schema(
         default: true,
       },
     },
-    createdAt: {
+    joinDate: {
       type: Date,
       default: Date.now,
     },

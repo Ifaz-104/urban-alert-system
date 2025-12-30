@@ -3,6 +3,8 @@ const IncidentReport = require('../models/IncidentReport');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 const { broadcastHazardAlert } = require('./notificationController');
+const { awardPointsHelper, POINTS } = require('./pointsController');
+const ActivityLog = require('../models/ActivityLog');
 
 // @desc    Get dashboard statistics
 // @route   GET /api/admin/stats
@@ -147,6 +149,45 @@ exports.verifyReport = async (req, res) => {
 
     await report.save();
 
+    // Log activity for admin verifying report
+    await ActivityLog.create({
+      userId: adminId,
+      action: 'verify_report',
+      details: `Verified report: ${report.title}`,
+      relatedReportId: report._id,
+    });
+
+    // Award points to the report creator
+    // +10 points for submitting report (when verified)
+    // +20 bonus points for verification
+    let pointsResult = null;
+    try {
+      // Award submit_report points (10)
+      const submitResult = await awardPointsHelper(
+        report.userId,
+        POINTS.SUBMIT_REPORT,
+        'submit_report',
+        `Report verified: ${report.title}`,
+        report._id
+      );
+
+      // Award verification bonus points (20)
+      pointsResult = await awardPointsHelper(
+        report.userId,
+        POINTS.REPORT_VERIFIED,
+        'report_verified',
+        `Bonus for verified report: ${report.title}`,
+        report._id
+      );
+
+      // Combine new badges from both awards
+      const allNewBadges = [...(submitResult.newBadges || []), ...(pointsResult.newBadges || [])];
+      pointsResult.newBadges = [...new Set(allNewBadges)]; // Remove duplicates
+    } catch (error) {
+      console.error('Error awarding points for verified report:', error);
+      // Continue even if points awarding fails
+    }
+
     // Populate before returning
     await report.populate('userId', 'username email');
     await report.populate('verifiedBy', 'username');
@@ -155,6 +196,8 @@ exports.verifyReport = async (req, res) => {
       success: true,
       message: 'Report verified successfully',
       data: report,
+      pointsAwarded: pointsResult ? POINTS.SUBMIT_REPORT + POINTS.REPORT_VERIFIED : null,
+      newBadges: pointsResult ? pointsResult.newBadges : [],
     });
   } catch (error) {
     res.status(500).json({

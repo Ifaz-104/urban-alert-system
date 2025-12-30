@@ -42,7 +42,10 @@ app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/emergency-contacts', require('./routes/emergencyContactRoutes'));
 app.use('/api/user/preferences', require('./routes/userPreferencesRoutes'));
+app.use('/api/user', require('./routes/userRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/leaderboard', require('./routes/leaderboardRoutes'));
+app.use('/api/points', require('./routes/pointsRoutes'));
 
 // Socket.io event handlers
 io.on('connection', (socket) => {
