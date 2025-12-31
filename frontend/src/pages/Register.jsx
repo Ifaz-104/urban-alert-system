@@ -12,6 +12,8 @@ export default function Register() {
     password: '',
     phone: '',
     address: '',
+    role: 'user',
+    adminCode: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -92,6 +94,44 @@ export default function Register() {
               placeholder="Your phone number"
             />
           </div>
+
+          <div className="form-group">
+            <label>Register as</label>
+            <div className="radio-group">
+              <label>
+                <input
+                  type="radio"
+                  name="role"
+                  value="user"
+                  checked={formData.role === 'user'}
+                  onChange={handleChange}
+                /> User
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="role"
+                  value="admin"
+                  checked={formData.role === 'admin'}
+                  onChange={handleChange}
+                /> Admin
+              </label>
+            </div>
+          </div>
+
+          {formData.role === 'admin' && (
+            <div className="form-group">
+              <label>Admin Registration Code</label>
+              <input
+                type="password"
+                name="adminCode"
+                value={formData.adminCode}
+                onChange={handleChange}
+                placeholder="Enter admin registration code"
+              />
+              <small className="hint">Provide the admin code to register as an administrator.</small>
+            </div>
+          )}
 
           <div className="form-group">
             <label>Address (Optional)</label>

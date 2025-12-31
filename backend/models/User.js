@@ -28,6 +28,32 @@ const userSchema = new mongoose.Schema(
     },
     phone: String,
     address: String,
+    bio: {
+      type: String,
+      default: '',
+      maxlength: 500,
+    },
+    // Location for radius-based alerts (optional)
+    // Only set when coordinates are provided. Do NOT default `type` to 'Point'
+    // because that creates an invalid GeoJSON Point without `coordinates`.
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: undefined
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+      }
+    },
+    latitude: {
+      type: Number,
+      sparse: true
+    },
+    longitude: {
+      type: Number,
+      sparse: true
+    },
     role: {
       type: String,
       enum: ['user', 'admin'],
@@ -37,8 +63,66 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    profilePhoto: String,
-    createdAt: {
+    badges: {
+      type: [String],
+      default: [],
+    },
+    totalReports: {
+      type: Number,
+      default: 0,
+    },
+    profilePhoto: {
+      type: String,
+      default: '',
+    },
+    // Notification preferences
+    notificationSettings: {
+      // Category preferences (enable/disable notifications for each category)
+      accident: {
+        type: Boolean,
+        default: true,
+      },
+      fire: {
+        type: Boolean,
+        default: true,
+      },
+      flood: {
+        type: Boolean,
+        default: true,
+      },
+      crime: {
+        type: Boolean,
+        default: true,
+      },
+      pollution: {
+        type: Boolean,
+        default: true,
+      },
+      earthquake: {
+        type: Boolean,
+        default: true,
+      },
+      cyclone: {
+        type: Boolean,
+        default: true,
+      },
+      other: {
+        type: Boolean,
+        default: true,
+      },
+      // Notification method preference
+      method: {
+        type: String,
+        enum: ['push', 'email', 'sms', 'all'],
+        default: 'push',
+      },
+      // Enable/disable all notifications
+      enabled: {
+        type: Boolean,
+        default: true,
+      },
+    },
+    joinDate: {
       type: Date,
       default: Date.now,
     },
@@ -59,5 +143,9 @@ userSchema.pre('save', async function () {
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+// Geospatial index for location-based queries
+userSchema.index({ location: '2dsphere' });
+userSchema.index({ latitude: 1, longitude: 1 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -190,8 +190,23 @@ exports.broadcastHazardAlert = async (io, report, creator) => {
     // Get all users except the creator
     const users = await User.find({ _id: { $ne: report.userId } });
 
-    // Create notifications for all users
-    const notificationPromises = users.map((user) => {
+    // Filter users based on their notification preferences
+    const usersToNotify = users.filter((user) => {
+      const prefs = user.notificationSettings || {};
+      
+      // Check if notifications are enabled
+      if (prefs.enabled === false) {
+        return false;
+      }
+
+      // Check if user wants notifications for this category
+      const categoryEnabled = prefs[report.category] !== false; // Default to true if not set
+      
+      return categoryEnabled;
+    });
+
+    // Create notifications only for users who want them
+    const notificationPromises = usersToNotify.map((user) => {
       return Notification.create({
         userId: user._id,
         reportId: report._id,

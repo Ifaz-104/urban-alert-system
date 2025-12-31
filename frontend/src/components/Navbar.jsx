@@ -31,7 +31,18 @@ export default function Navbar({ user, onLogout }) {
               <button onClick={() => navigate('/create-report')} className="nav-btn btn-primary">
                 Report Hazard
               </button>
-              <span className="user-info">
+              <button onClick={() => navigate('/leaderboard')} className="nav-btn">
+                🏆 Leaderboard
+              </button>
+              <button onClick={() => navigate('/settings')} className="nav-btn">
+                ⚙️ Settings
+              </button>
+              {user.role === 'admin' && (
+                <button onClick={() => navigate('/admin')} className="nav-btn btn-admin">
+                  🛡️ Admin
+                </button>
+              )}
+              <span className="user-info" onClick={() => navigate('/profile')}>
                 {user.username} ({user.points || 0} pts)
               </span>
               <NotificationBell user={user} />

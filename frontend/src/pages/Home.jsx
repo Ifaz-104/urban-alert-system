@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reportAPI } from '../services/api';
+import EmergencyContactShortcuts from '../components/EmergencyContactShortcuts';
 import './Home.css';
 
 export default function Home({ user }) {
@@ -76,6 +77,9 @@ export default function Home({ user }) {
           </button>
         )}
       </div>
+
+      {/* Emergency Contact Shortcuts */}
+      <EmergencyContactShortcuts user={user} />
 
       <div className="filters-section">
         <h3>Filter Reports</h3>

@@ -830,6 +830,20 @@ select.form-control {
   background: rgba(var(--color-error-rgb), 0.75);
 }
 
+.nav-btn.btn-admin {
+  background: #9b59b6;
+  color: var(--color-btn-primary-text);
+  border: none;
+}
+
+.nav-btn.btn-admin:hover {
+  background: #8e44ad;
+}
+
+.nav-btn.btn-admin:active {
+  background: #7d3c98;
+}
+
 .user-info {
   padding: var(--space-10) var(--space-16);
   background: var(--color-secondary);
